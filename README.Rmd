@@ -1,0 +1,96 @@
+---
+title: "cdsrgsea"
+output:
+  github_document:
+  html_notebook:
+    theme: united
+  html_document:
+    theme: united
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.width = 7, fig.height = 7, cache = T)
+
+library(tidyverse)
+library(useful)
+library(taigr)
+library(cdsrgsea)
+library(cdsrmodels)
+```
+
+cdsrgsea contains lightweight wrappers around useful gene set enrichment functions
+
+## Install
+
+```{r, eval = FALSE}
+library(devtools)
+devtools::install_github("broadinstitute/cdsr_gsea")
+```
+
+The package can then be loaded by calling
+
+```{r, eval=FALSE}
+library(cdsrgsea)
+```
+
+```{r include = F}
+gene_sets <- cdsrgsea::load_gene_sets()
+diff_expr <- read_csv("./nutlin.csv")
+```
+
+## load_gene_sets
+
+Loads a list of gene sets in term2gene format from taiga. These gene sets are drawn from the [Enrichr](https://amp.pharm.mssm.edu/Enrichr/#stats) and [MSigDB](https://www.gsea-msigdb.org/gsea/msigdb/index.jsp) libraries.
+
+```{r eval = F}
+gene_sets <- cdsrgsea::load_gene_sets()
+```
+
+```{r}
+gene_sets %>% names() %>% head()
+```
+
+```{r}
+gene_sets$Hallmark %>% head()
+```
+
+## run_ora
+
+Runs overrepresentation analysis with Fisher's exact test. The function excepts either a small list of significant genes or a table with gene level stats as input. If a table is provided the `gene_var`, `rank_var`, and `n_genes` parameters are used to define a small list of significant genes.
+
+1. Small list of significant genes
+
+```{r}
+genes <- diff_expr %>% arrange(logFC) %>% tail(100) %>% .[["Gene"]]
+genes %>% head()
+```
+
+```{r}
+ora_res <- cdsrgsea::run_ora(genes,gene_sets$Hallmark)
+ora_res
+```
+
+1. A table with gene level stats
+
+```{r}
+ora_res <- cdsrgsea::run_ora(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
+ora_res
+```
+
+## run_gsea
+
+Runs gene set enrichment analysis using the `fgseaMultilevel` method from the `fgsea` package. The function excepts a table with gene level stats. The `dir` parameter indicates whether to return positive gene sets, negative gene sets, or both.
+
+```{r}
+gsea_res <- cdsrgsea::run_gsea(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
+gsea_res
+```
+
+
+
+
+
+
+
