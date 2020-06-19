@@ -50,13 +50,13 @@ gene_sets$Hallmark %>% head()
     ## 5 HALLMARK_TNFA_SIGNALING_VIA_NFKB TNFAIP3
     ## 6 HALLMARK_TNFA_SIGNALING_VIA_NFKB PTGS2
 
-## run\_ora
+## run\_hyper
 
-Runs overrepresentation analysis with Fisher’s exact test. The function
-excepts either a small list of significant genes or a table with gene
-level stats as input. If a table is provided the `gene_var`, `rank_var`,
-and `n_genes` parameters are used to define a small list of significant
-genes.
+Runs overrepresentation analysis based on the hypergeometric
+distribution. The function excepts either a small list of significant
+genes or a table with gene level stats as input. If a table is provided
+the `gene_var`, `rank_var`, and `n_genes` parameters are used to define
+a small list of significant genes.
 
 1.  Small list of significant genes
 
@@ -70,8 +70,8 @@ genes %>% head()
     ## [1] "MYEOV2" "RRM2B"  "ANKRA2" "RPL35A" "RGS20"  "ORAI3"
 
 ``` r
-ora_res <- cdsrgsea::run_ora(genes,gene_sets$Hallmark)
-ora_res
+hyper_res <- cdsrgsea::run_hyper(genes,gene_sets$Hallmark)
+hyper_res
 ```
 
     ## # A tibble: 50 x 8
@@ -95,7 +95,7 @@ stats
 <!-- end list -->
 
 ``` r
-ora_res <- cdsrgsea::run_ora(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
+ora_res <- cdsrgsea::run_hyper(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
 ora_res
 ```
 
@@ -123,21 +123,21 @@ sets, negative gene sets, or
 both.
 
 ``` r
-gsea_res <- cdsrgsea::run_gsea(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
+gsea_res <- cdsrgsea::run_gsea(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "neg")
 gsea_res
 ```
 
-    ## # A tibble: 11 x 8
-    ##    term                p_value p_adjust    ES   NES direction  size leading_edge
-    ##    <chr>                 <dbl>    <dbl> <dbl> <dbl> <chr>     <int> <list>      
-    ##  1 HALLMARK_P53_PATH… 6.65e-34 3.32e-32 0.672 3.66  pos         142 <chr [70]>  
-    ##  2 HALLMARK_TNFA_SIG… 4.29e-11 4.29e-10 0.467 2.35  pos         124 <chr [53]>  
-    ##  3 HALLMARK_HYPOXIA   3.02e-10 2.51e- 9 0.450 2.29  pos         116 <chr [28]>  
-    ##  4 HALLMARK_APOPTOSIS 4.29e- 7 3.06e- 6 0.416 2.03  pos         109 <chr [30]>  
-    ##  5 HALLMARK_INFLAMMA… 3.81e- 3 1.59e- 2 0.337 1.67  pos          74 <chr [14]>  
-    ##  6 HALLMARK_COAGULAT… 3.45e- 3 1.57e- 2 0.383 1.66  pos          50 <chr [14]>  
-    ##  7 HALLMARK_EPITHELI… 1.68e- 3 8.40e- 3 0.304 1.54  pos         108 <chr [27]>  
-    ##  8 HALLMARK_KRAS_SIG… 4.88e- 2 1.51e- 1 0.390 1.41  pos          18 <chr [3]>   
-    ##  9 HALLMARK_MYOGENES… 1.33e- 1 3.17e- 1 0.269 1.37  pos          81 <chr [15]>  
-    ## 10 HALLMARK_KRAS_SIG… 9.67e- 2 2.42e- 1 0.258 1.29  pos          76 <chr [26]>  
-    ## 11 HALLMARK_COMPLEME… 1.00e+ 0 1.00e+ 0 0.176 0.883 pos          88 <chr [21]>
+    ## # A tibble: 39 x 8
+    ##    term               p_value p_adjust     ES   NES direction  size leading_edge
+    ##    <chr>                <dbl>    <dbl>  <dbl> <dbl> <chr>     <int> <list>      
+    ##  1 HALLMARK_E2F_TAR… 1.41e-23 3.53e-22 -0.646 -2.15 neg         179 <chr [118]> 
+    ##  2 HALLMARK_G2M_CHE… 2.00e-19 3.33e-18 -0.634 -2.10 neg         163 <chr [88]>  
+    ##  3 HALLMARK_MYC_TAR… 1.28e-14 1.60e-13 -0.574 -1.92 neg         196 <chr [93]>  
+    ##  4 HALLMARK_MYC_TAR… 4.67e- 4 2.59e- 3 -0.548 -1.65 neg          51 <chr [25]>  
+    ##  5 HALLMARK_PANCREA… 3.18e- 2 1.11e- 1 -0.692 -1.49 neg           8 <chr [4]>   
+    ##  6 HALLMARK_MITOTIC… 6.71e- 4 3.35e- 3 -0.442 -1.45 neg         144 <chr [83]>  
+    ##  7 HALLMARK_INTERFE… 3.33e- 2 1.11e- 1 -0.466 -1.40 neg          52 <chr [21]>  
+    ##  8 HALLMARK_SPERMAT… 7.74e- 2 1.94e- 1 -0.447 -1.33 neg          45 <chr [19]>  
+    ##  9 HALLMARK_DNA_REP… 2.61e- 2 1.00e- 1 -0.405 -1.32 neg         124 <chr [41]>  
+    ## 10 HALLMARK_ESTROGE… 5.03e- 2 1.57e- 1 -0.399 -1.28 neg         106 <chr [33]>  
+    ## # … with 29 more rows

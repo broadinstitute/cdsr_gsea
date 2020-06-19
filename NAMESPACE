@@ -2,4 +2,4 @@
 
 export(load_gene_sets)
 export(run_gsea)
-export(run_ora)
+export(run_hyper)

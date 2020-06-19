@@ -56,9 +56,9 @@ gene_sets %>% names() %>% head()
 gene_sets$Hallmark %>% head()
 ```
 
-## run_ora
+## run_hyper
 
-Runs overrepresentation analysis with Fisher's exact test. The function excepts either a small list of significant genes or a table with gene level stats as input. If a table is provided the `gene_var`, `rank_var`, and `n_genes` parameters are used to define a small list of significant genes.
+Runs overrepresentation analysis based on the hypergeometric distribution. The function excepts either a small list of significant genes or a table with gene level stats as input. If a table is provided the `gene_var`, `rank_var`, and `n_genes` parameters are used to define a small list of significant genes.
 
 1. Small list of significant genes
 
@@ -68,14 +68,14 @@ genes %>% head()
 ```
 
 ```{r}
-ora_res <- cdsrgsea::run_ora(genes,gene_sets$Hallmark)
-ora_res
+hyper_res <- cdsrgsea::run_hyper(genes,gene_sets$Hallmark)
+hyper_res
 ```
 
 1. A table with gene level stats
 
 ```{r}
-ora_res <- cdsrgsea::run_ora(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
+ora_res <- cdsrgsea::run_hyper(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
 ora_res
 ```
 
@@ -84,10 +84,9 @@ ora_res
 Runs gene set enrichment analysis using the `fgseaMultilevel` method from the `fgsea` package. The function excepts a table with gene level stats. The `dir` parameter indicates whether to return positive gene sets, negative gene sets, or both.
 
 ```{r}
-gsea_res <- cdsrgsea::run_gsea(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
+gsea_res <- cdsrgsea::run_gsea(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "neg")
 gsea_res
 ```
-
 
 
 

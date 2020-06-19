@@ -76,12 +76,10 @@ fisher_test <- function(genes,term2gene,p_adjust_method,min_size,max_size,dir) {
     dplyr::filter((size > min_size) & (size < max_size))
 
   #hypergeometric test
-  #k <- length(genes)
   m <- res$size
   x <- res$overlap_size
   n <- rep(length(unique(term2gene$gene)),length(m)) - m
   k <- intersect(genes,term2gene$gene) %>% length()
-  n <- rep(length(unique(term2gene$gene)),length(m)) - m
   args_df <- tibble(q=x-1,m=m,n=n,k=k)
   p_value <- apply(args_df, 1, function(n)
     phyper(n[1], n[2], n[3], n[4], lower.tail=FALSE)
@@ -125,8 +123,8 @@ fisher_test <- function(genes,term2gene,p_adjust_method,min_size,max_size,dir) {
 #' overlap: genes in both the gene set and significant genes list. \cr
 #' }
 #'
-#' @export run_ora
-run_ora <- function(gene_stats = NULL,term2gene,gene_var = "Gene",rank_var = "logFC",
+#' @export run_hyper
+run_hyper <- function(gene_stats,term2gene,gene_var = "Gene",rank_var = "logFC",
                     n_genes = 100,dir = "both",p_adjust_method = "BH",min_size = 1,max_size = Inf) {
 
   #Small list of genes
@@ -165,3 +163,4 @@ run_ora <- function(gene_stats = NULL,term2gene,gene_var = "Gene",rank_var = "lo
     return(rbind(res_pos,res_neg) %>% arrange(-odds_ratio))
   }
 }
+
