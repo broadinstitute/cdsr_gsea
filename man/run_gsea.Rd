@@ -4,8 +4,16 @@
 \alias{run_gsea}
 \title{Performs gene set enrichment analysis with fgsea on a table of gene stats}
 \usage{
-run_gsea(gene_stats, term2gene, gene_var = "Gene", rank_var = "logFC",
-  dir = "both", method = "fgsea", min_size = 1, max_size = 500)
+run_gsea(
+  gene_stats,
+  term2gene,
+  gene_var = "Gene",
+  rank_var = "logFC",
+  dir = "both",
+  method = "fgsea",
+  min_size = 1,
+  max_size = 500
+)
 }
 \arguments{
 \item{gene_stats}{a table of gene level stats.}
@@ -14,7 +22,7 @@ run_gsea(gene_stats, term2gene, gene_var = "Gene", rank_var = "logFC",
 
 \item{gene_var}{name of the column containing gene names.}
 
-\item{rank_var}{name of the column to rank genes by.}
+\item{rank_var}{name of the column containing gene stats.}
 
 \item{dir}{direction(s) to consider. Options are ("both","pos","neg")}
 
@@ -32,7 +40,7 @@ p_value: enrichment p-value. \cr
 p_adjust: BH-adjusted p-value. \cr
 ES: enrichment score. \cr
 NES: enrichment score normalized to mean enrichment of random samples of the same size. \cr
-direction: enrichment direction. \cr
+direction: enrichment direction. Options are ("both","pos","neg"). \cr
 size: size of the gene set. \cr
 leading_edge: vector with indexes of leading edge genes that drive the enrichment. \cr
 }

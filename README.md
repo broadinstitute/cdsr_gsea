@@ -52,92 +52,133 @@ gene_sets$Hallmark %>% head()
 
 ## run\_hyper
 
-Runs overrepresentation analysis based on the hypergeometric
+`run_hyper` runs overrepresentation analysis based on the hypergeometric
 distribution. The function excepts either a small list of significant
 genes or a table with gene level stats as input. If a table is provided
 the `gene_var`, `rank_var`, and `n_genes` parameters are used to define
 a small list of significant genes.
+
+As an example we will load the results of a differential expression
+anlyses comparing Nutlin treated cells to DMSO treated cells.
+
+``` r
+nutlin <- read_csv("./nutlin.csv")
+nutlin %>% head()
+```
+
+    ## # A tibble: 6 x 3
+    ##   Gene   logFC `-log10(p-value)`
+    ##   <chr>  <dbl>             <dbl>
+    ## 1 CDKN1A 1.31              166. 
+    ## 2 MDM2   0.994             154. 
+    ## 3 GDF15  0.977             145. 
+    ## 4 SUGCT  0.708             139. 
+    ## 5 RPS27  0.366              96.4
+    ## 6 FDXR   0.679              96.0
 
 1.  Small list of significant genes
 
 <!-- end list -->
 
 ``` r
-genes <- diff_expr %>% arrange(logFC) %>% tail(100) %>% .[["Gene"]]
+genes <- nutlin %>% arrange(-logFC) %>% head(100) %>% .[["Gene"]]
 genes %>% head()
 ```
 
-    ## [1] "MYEOV2" "RRM2B"  "ANKRA2" "RPL35A" "RGS20"  "ORAI3"
+    ## [1] "CDKN1A" "MDM2"   "GDF15"  "TP53I3" "SUGCT"  "FDXR"
 
 ``` r
-hyper_res <- cdsrgsea::run_hyper(genes,gene_sets$Hallmark)
+hyper_res <- cdsrgsea::run_hyper(genes,gene_sets$Hallmark,universe = nutlin$Gene)
 hyper_res
 ```
 
     ## # A tibble: 50 x 8
     ##    term         p_value p_adjust odds_ratio direction  size overlap_size overlap
     ##    <chr>          <dbl>    <dbl>      <dbl> <lgl>     <int>        <int> <list> 
-    ##  1 HALLMARK_P… 5.52e-21 2.76e-19      25.8  NA          200           24 <chr […
-    ##  2 HALLMARK_A… 3.33e- 5 8.32e- 4       6.70 NA          161            9 <chr […
-    ##  3 HALLMARK_T… 1.81e- 4 3.02e- 3       5.28 NA          200            9 <chr […
-    ##  4 HALLMARK_O… 9.52e- 4 1.19e- 2       4.55 NA          200            8 <chr […
-    ##  5 HALLMARK_M… 1.71e- 2 1.71e- 1       3.20 NA          200            6 <chr […
-    ##  6 HALLMARK_P… 9.67e- 2 6.05e- 1       2.90 NA          105            3 <chr […
-    ##  7 HALLMARK_H… 5.66e- 2 4.04e- 1       2.59 NA          200            5 <chr […
-    ##  8 HALLMARK_X… 5.66e- 2 4.04e- 1       2.59 NA          200            5 <chr […
-    ##  9 HALLMARK_C… 1.75e- 1 7.96e- 1       2.17 NA          138            3 <chr […
-    ## 10 HALLMARK_U… 1.91e- 1 7.96e- 1       2.08 NA          144            3 <chr […
+    ##  1 HALLMARK_P… 1.16e-18 5.79e-17      20.8  NA          142           24 <chr […
+    ##  2 HALLMARK_K… 4.49e- 2 3.74e- 1       6.68 NA           18            2 <chr […
+    ##  3 HALLMARK_A… 1.53e- 4 3.82e- 3       5.51 NA          109            9 <chr […
+    ##  4 HALLMARK_T… 4.10e- 4 6.84e- 3       4.76 NA          124            9 <chr […
+    ##  5 HALLMARK_C… 6.82e- 2 4.26e- 1       3.44 NA           50            3 <chr […
+    ##  6 HALLMARK_X… 2.89e- 2 2.89e- 1       3.19 NA           92            5 <chr […
+    ##  7 HALLMARK_O… 1.16e- 2 1.45e- 1       2.94 NA          166            8 <chr […
+    ##  8 HALLMARK_H… 6.71e- 2 4.26e- 1       2.48 NA          116            5 <chr […
+    ##  9 HALLMARK_P… 1.47e- 1 5.83e- 1       2.39 NA           70            3 <chr […
+    ## 10 HALLMARK_A… 1.52e- 1 5.83e- 1       2.36 NA           71            3 <chr […
     ## # … with 40 more rows
 
-1.  A table with gene level
+2.  A table with gene level
 stats
 
 <!-- end list -->
 
 ``` r
-ora_res <- cdsrgsea::run_hyper(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
-ora_res
+hyper_res <- cdsrgsea::run_hyper(nutlin,gene_sets$Hallmark,gene_var = "Gene",
+                                 rank_var = "logFC",dir = "pos",n_genes = 100)
+hyper_res
 ```
 
     ## # A tibble: 50 x 8
     ##    term         p_value p_adjust odds_ratio direction  size overlap_size overlap
     ##    <chr>          <dbl>    <dbl>      <dbl> <chr>     <int>        <int> <list> 
-    ##  1 HALLMARK_P… 5.52e-21 2.76e-19      25.8  pos         200           24 <chr […
-    ##  2 HALLMARK_A… 3.33e- 5 8.32e- 4       6.70 pos         161            9 <chr […
-    ##  3 HALLMARK_T… 1.81e- 4 3.02e- 3       5.28 pos         200            9 <chr […
-    ##  4 HALLMARK_O… 9.52e- 4 1.19e- 2       4.55 pos         200            8 <chr […
-    ##  5 HALLMARK_M… 1.71e- 2 1.71e- 1       3.20 pos         200            6 <chr […
-    ##  6 HALLMARK_P… 9.67e- 2 6.05e- 1       2.90 pos         105            3 <chr […
-    ##  7 HALLMARK_H… 5.66e- 2 4.04e- 1       2.59 pos         200            5 <chr […
-    ##  8 HALLMARK_X… 5.66e- 2 4.04e- 1       2.59 pos         200            5 <chr […
-    ##  9 HALLMARK_C… 1.75e- 1 7.96e- 1       2.17 pos         138            3 <chr […
-    ## 10 HALLMARK_U… 1.91e- 1 7.96e- 1       2.08 pos         144            3 <chr […
+    ##  1 HALLMARK_P… 1.16e-18 5.79e-17      20.8  pos         142           24 <chr […
+    ##  2 HALLMARK_K… 4.49e- 2 3.74e- 1       6.68 pos          18            2 <chr […
+    ##  3 HALLMARK_A… 1.53e- 4 3.82e- 3       5.51 pos         109            9 <chr […
+    ##  4 HALLMARK_T… 4.10e- 4 6.84e- 3       4.76 pos         124            9 <chr […
+    ##  5 HALLMARK_C… 6.82e- 2 4.26e- 1       3.44 pos          50            3 <chr […
+    ##  6 HALLMARK_X… 2.89e- 2 2.89e- 1       3.19 pos          92            5 <chr […
+    ##  7 HALLMARK_O… 1.16e- 2 1.45e- 1       2.94 pos         166            8 <chr […
+    ##  8 HALLMARK_H… 6.71e- 2 4.26e- 1       2.48 pos         116            5 <chr […
+    ##  9 HALLMARK_P… 1.47e- 1 5.83e- 1       2.39 pos          70            3 <chr […
+    ## 10 HALLMARK_A… 1.52e- 1 5.83e- 1       2.36 pos          71            3 <chr […
     ## # … with 40 more rows
 
 ## run\_gsea
 
-Runs gene set enrichment analysis using the `fgseaMultilevel` method
-from the `fgsea` package. The function excepts a table with gene level
-stats. The `dir` parameter indicates whether to return positive gene
-sets, negative gene sets, or
+`run_gsea` runs gene set enrichment analysis using the `fgseaMultilevel`
+method from the `fgsea` package. The function excepts a table with gene
+level stats. The `dir` parameter indicates whether to return positive
+gene sets, negative gene sets, or
 both.
 
 ``` r
-gsea_res <- cdsrgsea::run_gsea(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "neg")
+gsea_res <- cdsrgsea::run_gsea(nutlin,gene_sets$Hallmark,gene_var = "Gene",
+                               rank_var = "logFC",dir = "both")
 gsea_res
 ```
 
-    ## # A tibble: 39 x 8
-    ##    term               p_value p_adjust     ES   NES direction  size leading_edge
-    ##    <chr>                <dbl>    <dbl>  <dbl> <dbl> <chr>     <int> <list>      
-    ##  1 HALLMARK_E2F_TAR… 1.41e-23 3.53e-22 -0.646 -2.15 neg         179 <chr [118]> 
-    ##  2 HALLMARK_G2M_CHE… 2.00e-19 3.33e-18 -0.634 -2.10 neg         163 <chr [88]>  
-    ##  3 HALLMARK_MYC_TAR… 1.28e-14 1.60e-13 -0.574 -1.92 neg         196 <chr [93]>  
-    ##  4 HALLMARK_MYC_TAR… 4.67e- 4 2.59e- 3 -0.548 -1.65 neg          51 <chr [25]>  
-    ##  5 HALLMARK_PANCREA… 3.18e- 2 1.11e- 1 -0.692 -1.49 neg           8 <chr [4]>   
-    ##  6 HALLMARK_MITOTIC… 6.71e- 4 3.35e- 3 -0.442 -1.45 neg         144 <chr [83]>  
-    ##  7 HALLMARK_INTERFE… 3.33e- 2 1.11e- 1 -0.466 -1.40 neg          52 <chr [21]>  
-    ##  8 HALLMARK_SPERMAT… 7.74e- 2 1.94e- 1 -0.447 -1.33 neg          45 <chr [19]>  
-    ##  9 HALLMARK_DNA_REP… 2.61e- 2 1.00e- 1 -0.405 -1.32 neg         124 <chr [41]>  
-    ## 10 HALLMARK_ESTROGE… 5.03e- 2 1.57e- 1 -0.399 -1.28 neg         106 <chr [33]>  
-    ## # … with 29 more rows
+    ## # A tibble: 50 x 8
+    ##    term              p_value  p_adjust     ES   NES direction  size leading_edge
+    ##    <chr>               <dbl>     <dbl>  <dbl> <dbl> <chr>     <int> <list>      
+    ##  1 HALLMARK_P53_PA… 1.00e-10   1.02e-9  0.672  3.55 pos         142 <chr [70]>  
+    ##  2 HALLMARK_TNFA_S… 1.02e-10   1.02e-9  0.467  2.38 pos         124 <chr [53]>  
+    ##  3 HALLMARK_HYPOXIA 1.80e- 9   1.50e-8  0.450  2.33 pos         116 <chr [28]>  
+    ##  4 HALLMARK_APOPTO… 7.02e- 8   5.01e-7  0.416  2.24 pos         109 <chr [30]>  
+    ##  5 HALLMARK_E2F_TA… 1.00e-10   1.02e-9 -0.646 -2.15 neg         179 <chr [118]> 
+    ##  6 HALLMARK_G2M_CH… 1.00e-10   1.02e-9 -0.634 -2.10 neg         163 <chr [88]>  
+    ##  7 HALLMARK_MYC_TA… 1.00e-10   1.02e-9 -0.574 -1.92 neg         196 <chr [93]>  
+    ##  8 HALLMARK_COAGUL… 4.69e- 3   1.95e-2  0.383  1.71 pos          50 <chr [14]>  
+    ##  9 HALLMARK_MYC_TA… 6.24e- 4   3.47e-3 -0.548 -1.64 neg          51 <chr [25]>  
+    ## 10 HALLMARK_INFLAM… 1.92e- 3   9.62e-3  0.337  1.63 pos          74 <chr [14]>  
+    ## # … with 40 more rows
+
+## Plot results
+
+This package is designed to be used with the plotting functions in
+[cdsr\_plots](https://github.com/broadinstitute/cdsr_plots)
+
+`make_gsea_bar`
+
+``` r
+cdsrplots::make_gsea_bar(hyper_res,dir = "pos")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+`make_gsea_dot`
+
+``` r
+cdsrplots::make_gsea_dot(gsea_res,dir = "both")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->

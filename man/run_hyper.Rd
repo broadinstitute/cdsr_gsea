@@ -4,9 +4,18 @@
 \alias{run_hyper}
 \title{Performs over representation analysis with fisher's exact test on a gene list or table of gene stats}
 \usage{
-run_hyper(gene_stats, term2gene, gene_var = "Gene", rank_var = "logFC",
-  n_genes = 100, dir = "both", p_adjust_method = "BH",
-  min_size = 1, max_size = Inf)
+run_hyper(
+  gene_stats,
+  term2gene,
+  gene_var = "Gene",
+  rank_var = "logFC",
+  universe = NULL,
+  n_genes = 100,
+  dir = "both",
+  p_adjust_method = "BH",
+  min_size = 1,
+  max_size = Inf
+)
 }
 \arguments{
 \item{gene_stats}{a small list of significant genes or table of gene level stats.}
@@ -15,11 +24,14 @@ run_hyper(gene_stats, term2gene, gene_var = "Gene", rank_var = "logFC",
 
 \item{gene_var}{if gene_stats is table, name of the column containing gene names.}
 
-\item{rank_var}{if gene_stats is table, name of the column to rank genes by.}
+\item{rank_var}{if gene_stats is table, name of the column containing gene stats to rank by.}
 
-\item{n_genes}{if gene_stats is table, number of genes to select after ranking by rank_var}
+\item{universe}{an optional list of genes that represent the universe. Defaults to genes if gene_stats is a table.
+Defaults to all genes if gene_stats is a list.}
 
-\item{dir}{if gene_stats, direction(s) to consider. Options are ("both","pos","neg")}
+\item{n_genes}{if gene_stats is table, number of genes to select after ranking by rank_var.}
+
+\item{dir}{if gene_stats, direction(s) to consider. Options are ("both","pos","neg").}
 
 \item{p_adjust_method}{Method for p-value adjustment. Defaults to BH}
 

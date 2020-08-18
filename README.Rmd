@@ -11,13 +11,13 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.width = 7, fig.height = 7, cache = T)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.width = 7, fig.height = 5, cache = T)
 
 library(tidyverse)
 library(useful)
 library(taigr)
 library(cdsrgsea)
-library(cdsrmodels)
+library(cdsrplots)
 ```
 
 cdsrgsea contains lightweight wrappers around useful gene set enrichment functions
@@ -37,7 +37,6 @@ library(cdsrgsea)
 
 ```{r include = F}
 gene_sets <- cdsrgsea::load_gene_sets()
-diff_expr <- read_csv("./nutlin.csv")
 ```
 
 ## load_gene_sets
@@ -58,37 +57,60 @@ gene_sets$Hallmark %>% head()
 
 ## run_hyper
 
-Runs overrepresentation analysis based on the hypergeometric distribution. The function excepts either a small list of significant genes or a table with gene level stats as input. If a table is provided the `gene_var`, `rank_var`, and `n_genes` parameters are used to define a small list of significant genes.
+`run_hyper` runs overrepresentation analysis based on the hypergeometric distribution. The function excepts either a small list of significant genes or a table with gene level stats as input. If a table is provided the `gene_var`, `rank_var`, and `n_genes` parameters are used to define a small list of significant genes.
+
+As an example we will load the results of a differential expression anlyses comparing Nutlin treated cells to DMSO treated cells.
+
+```{r}
+nutlin <- read_csv("./nutlin.csv")
+nutlin %>% head()
+```
 
 1. Small list of significant genes
 
 ```{r}
-genes <- diff_expr %>% arrange(logFC) %>% tail(100) %>% .[["Gene"]]
+genes <- nutlin %>% arrange(-logFC) %>% head(100) %>% .[["Gene"]]
 genes %>% head()
 ```
 
 ```{r}
-hyper_res <- cdsrgsea::run_hyper(genes,gene_sets$Hallmark)
+hyper_res <- cdsrgsea::run_hyper(genes,gene_sets$Hallmark,universe = nutlin$Gene)
 hyper_res
 ```
 
-1. A table with gene level stats
+2. A table with gene level stats
 
 ```{r}
-ora_res <- cdsrgsea::run_hyper(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "pos")
-ora_res
+hyper_res <- cdsrgsea::run_hyper(nutlin,gene_sets$Hallmark,gene_var = "Gene",
+                                 rank_var = "logFC",dir = "pos",n_genes = 100)
+hyper_res
 ```
 
 ## run_gsea
 
-Runs gene set enrichment analysis using the `fgseaMultilevel` method from the `fgsea` package. The function excepts a table with gene level stats. The `dir` parameter indicates whether to return positive gene sets, negative gene sets, or both.
+`run_gsea` runs gene set enrichment analysis using the `fgseaMultilevel` method from the `fgsea` package. The function excepts a table with gene level stats. The `dir` parameter indicates whether to return positive gene sets, negative gene sets, or both.
 
 ```{r}
-gsea_res <- cdsrgsea::run_gsea(diff_expr,gene_sets$Hallmark,gene_var = "Gene",rank_var = "logFC",dir = "neg")
+gsea_res <- cdsrgsea::run_gsea(nutlin,gene_sets$Hallmark,gene_var = "Gene",
+                               rank_var = "logFC",dir = "both")
 gsea_res
 ```
 
+## Plot results
 
+This package is designed to be used with the plotting functions in [cdsr_plots](https://github.com/broadinstitute/cdsr_plots)
+
+`make_gsea_bar`
+
+```{r}
+cdsrplots::make_gsea_bar(hyper_res,dir = "pos")
+```
+
+`make_gsea_dot`
+
+```{r}
+cdsrplots::make_gsea_dot(gsea_res,dir = "both")
+```
 
 
 

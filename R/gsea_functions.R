@@ -18,7 +18,7 @@ load_gene_sets <- function() {
 #' @param gene_stats a table of gene level stats.
 #' @param term2gene a table of gene_sets in term2gene format.
 #' @param gene_var name of the column containing gene names.
-#' @param rank_var name of the column to rank genes by.
+#' @param rank_var name of the column containing gene stats.
 #' @param dir direction(s) to consider. Options are ("both","pos","neg")
 #' @param method GSEA methods. Options are ("fgsea").
 #' @param min_size minimal size of a gene set to test.
@@ -32,7 +32,7 @@ load_gene_sets <- function() {
 #' p_adjust: BH-adjusted p-value. \cr
 #' ES: enrichment score. \cr
 #' NES: enrichment score normalized to mean enrichment of random samples of the same size. \cr
-#' direction: enrichment direction. \cr
+#' direction: enrichment direction. Options are ("both","pos","neg"). \cr
 #' size: size of the gene set. \cr
 #' leading_edge: vector with indexes of leading edge genes that drive the enrichment. \cr
 #' }
@@ -103,9 +103,11 @@ fisher_test <- function(genes,term2gene,p_adjust_method,min_size,max_size,dir) {
 #' @param gene_stats a small list of significant genes or table of gene level stats.
 #' @param term2gene a table of gene_sets in term2gene format.
 #' @param gene_var if gene_stats is table, name of the column containing gene names.
-#' @param rank_var if gene_stats is table, name of the column to rank genes by.
-#' @param n_genes if gene_stats is table, number of genes to select after ranking by rank_var
-#' @param dir if gene_stats, direction(s) to consider. Options are ("both","pos","neg")
+#' @param rank_var if gene_stats is table, name of the column containing gene stats to rank by.
+#' @param universe an optional list of genes that represent the universe. Defaults to genes if gene_stats is a table.
+#' Defaults to all genes if gene_stats is a list.
+#' @param n_genes if gene_stats is table, number of genes to select after ranking by rank_var.
+#' @param dir if gene_stats, direction(s) to consider. Options are ("both","pos","neg").
 #' @param p_adjust_method Method for p-value adjustment. Defaults to BH
 #' @param min_size minimal size of a gene set to test.
 #' @param max_size maximal size of a gene set to test.
@@ -124,7 +126,7 @@ fisher_test <- function(genes,term2gene,p_adjust_method,min_size,max_size,dir) {
 #' }
 #'
 #' @export run_hyper
-run_hyper <- function(gene_stats,term2gene,gene_var = "Gene",rank_var = "logFC",
+run_hyper <- function(gene_stats,term2gene,gene_var = "Gene",rank_var = "logFC",universe = NULL,
                     n_genes = 100,dir = "both",p_adjust_method = "BH",min_size = 1,max_size = Inf) {
 
   #Small list of genes
@@ -132,6 +134,7 @@ run_hyper <- function(gene_stats,term2gene,gene_var = "Gene",rank_var = "logFC",
     if(length(intersect(gene_stats,term2gene$gene)) < 5) {
       stop(str_c("expecting genes in format ",term2gene$gene[1]," ",term2gene$gene[2],"..."))
     }
+    if (!is.null(universe)) {term2gene <- term2gene %>% filter(gene %in% universe)}
     res <- fisher_test(gene_stats,term2gene,p_adjust_method,min_size,max_size,dir = NA)
     return(res)
   }
@@ -149,6 +152,8 @@ run_hyper <- function(gene_stats,term2gene,gene_var = "Gene",rank_var = "logFC",
   }
   genes_pos <- sort(stats_vec) %>% names() %>% tail(n_genes)
   genes_neg <- sort(stats_vec) %>% names() %>% head(n_genes)
+  if (is.null(universe)) {term2gene <- term2gene %>% filter(gene %in% unique(gene_stats[[gene_var]]))
+  } else {term2gene <- term2gene %>% filter(gene %in% universe)}
   if(!is.null(gene_stats) & dir == "pos"){
     res <- fisher_test(genes_pos,term2gene,p_adjust_method,min_size,max_size,dir = dir)
     return(res)
