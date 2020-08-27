@@ -9,7 +9,7 @@ require(tidyverse)
 #'
 #'
 load_gene_sets <- function() {
-  read_rds(download.raw.from.taiga(data.name='msigdb-gene-set-collections-8453',data.file='gsc_data_term2gene'))
+  readr::read_rds(taigr::download.raw.from.taiga(data.name='msigdb-gene-set-collections-8453',data.file='gsc_data_term2gene'))
 }
 
 
@@ -57,11 +57,11 @@ run_gsea <- function(gene_stats, term2gene, gene_var = "Gene", rank_var = "logFC
     stats_vec <- rev(sort(stats_vec))
     fgsea_res <- suppressWarnings(fgsea::fgseaMultilevel(pathways = gene_set_list,stats = stats_vec,
                  minSize = min_size,maxSize = max_size))
-    res <- fgsea_res %>% as_tibble() %>%
+    res <- fgsea_res %>% dplyr::as_tibble() %>%
       dplyr::transmute(term=pathway,p_value=pval,p_adjust=padj,ES=ES,NES=NES,direction = ifelse(NES > 0,"pos","neg"),
-      size=size,leading_edge = leadingEdge) %>% arrange(-abs(NES))
+      size=size,leading_edge = leadingEdge) %>% dplyr::arrange(-abs(NES))
     if(dir != "both") {
-      res <- res %>% filter(direction == dir)
+      res <- res %>% dplyr::filter(direction == dir)
     }
   }
 
@@ -90,9 +90,9 @@ fisher_test <- function(genes,term2gene,p_adjust_method,min_size,max_size,dir) {
   prob_not_in_set <- (k-x)/n
   odds_ratio <- (prob_in_set / (1 - prob_in_set)) / (prob_not_in_set / (1 - prob_not_in_set))
 
-  res <- res %>% mutate(p_value = p_value,p_adjust = p.adjust(p_value, method=p_adjust_method),odds_ratio = odds_ratio,direction = dir) %>%
-    select(term,p_value,p_adjust,odds_ratio,direction,size,overlap_size,overlap) %>%
-    arrange(-odds_ratio)
+  res <- res %>% dplyr::mutate(p_value = p_value,p_adjust = p.adjust(p_value, method=p_adjust_method),odds_ratio = odds_ratio,direction = dir) %>%
+    dplyr::select(term,p_value,p_adjust,odds_ratio,direction,size,overlap_size,overlap) %>%
+    dplyr::arrange(-odds_ratio)
 
   return(res)
 }
@@ -165,7 +165,7 @@ run_hyper <- function(gene_stats,term2gene,gene_var = "Gene",rank_var = "logFC",
   if(!is.null(gene_stats) & dir == "both"){
     res_pos <- fisher_test(genes_pos,term2gene,p_adjust_method,min_size,max_size,dir = "pos")
     res_neg <- fisher_test(genes_neg,term2gene,p_adjust_method,min_size,max_size,dir = "neg")
-    return(rbind(res_pos,res_neg) %>% arrange(-odds_ratio))
+    return(rbind(res_pos,res_neg) %>% dplyr::arrange(-odds_ratio))
   }
 }
 
